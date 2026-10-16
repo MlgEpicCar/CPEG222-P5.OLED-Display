@@ -33,8 +33,8 @@ int main(void){
     delay_ms(8000); // Delay for 8 seconds to display the clock information
     OLED_Clear();
     OLED_Print(0, 0, "CPEG222-F26 OLED Test");
-    OLED_Print(1, 0, "<demo date here>");
-    OLED_Print(3, 0, "<your name here>");
+    OLED_Print(1, 0, "10-16-2026");
+    OLED_Print(3, 0, "Carlos Munar");
     while(1){
         // Main loop
     }   
