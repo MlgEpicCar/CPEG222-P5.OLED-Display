@@ -218,3 +218,11 @@ void SH1106_RenderFullScreenLogo(void) {
         }
     }
 }
+
+void OLED_InvertedCheck(void) {
+    if (SWITCH_PORT-> IDR & (1U << S1)) {
+        OLED_WriteCmd(0xA7); // Inverted display mode
+    } else {
+        OLED_WriteCmd(0xA6); // Normal display mode
+    }
+}

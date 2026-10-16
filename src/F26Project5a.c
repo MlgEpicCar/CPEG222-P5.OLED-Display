@@ -22,8 +22,10 @@ int main(void){
     SystemCoreClockUpdate(); // Update SystemCoreClock variable after clock change
     finalClock = SystemCoreClock; // Store the final clock frequency (180 MHz)
     OLED_Init();
+    OLED_InvertedCheck(); // COOKED Hardcoded check if inverted
     SH1106_RenderFullScreenLogo();
     delay_ms(4000); // Delay for 4 seconds to display the logo
+    OLED_InvertedCheck(); // COOKED Hardcoded check if inverted
     OLED_Clear();
     OLED_Print(0, 0, "CPEG222-F26 OLED Test");
     snprintf(buffer, sizeof(buffer), "Initial Clock: %lu MHz  ", initialClock / 1000000U);               
@@ -37,6 +39,7 @@ int main(void){
     OLED_Print(3, 0, "Carlos Munar");
     while(1){
         // Main loop
+        OLED_InvertedCheck();
     }   
     return 0;// Program should never reach here due to infinite loop
 }
