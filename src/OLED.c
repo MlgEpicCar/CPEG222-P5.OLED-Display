@@ -9,6 +9,10 @@
 #include "logo_bitmap.h"
 #include <stddef.h>// For size_t definition
 
+/* Switch Definitions */
+#define S1 8
+#define SWITCH_PORT GPIOC
+
 #define SPI1_SCK_PIN     5U  // SPI1 SCK pin is connected to PA5
 #define SPI1_MISO_PIN    6U  // SPI1 MISO pin is connected to PA6
 #define SPI1_MOSI_PIN    7U  // SPI1 MOSI pin is connected to PA7
@@ -59,6 +63,7 @@ static void SPI_Write(const uint8_t *buf, size_t len){ //macro to write multiple
 void OLED_Init(void) {
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;// Enable GPIOA clock
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN;// Enable GPIOG clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
 
     SPI1_PORT->MODER &= ~((0x3U << (SPI1_SCK_PIN * 2U)) |
                           (0x3U << (SPI1_MISO_PIN * 2U)) |
@@ -83,6 +88,8 @@ void OLED_Init(void) {
                           (0x3U << (OLED_RESET_PIN * 2U)));// Clear mode bits for OLED DC and RESET pins
     OLED_PORT->MODER |= (0x1U << (OLED_DC_PIN * 2U)) |
                         (0x1U << (OLED_RESET_PIN * 2U)); // Set OLED DC and RESET pins as output
+
+    SWITCH_PORT->MODER &= ~(3U << (S1 * 2));
 
     OLED_Unselect();
     OLED_DC_Data();
