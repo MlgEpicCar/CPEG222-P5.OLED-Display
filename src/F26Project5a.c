@@ -34,12 +34,27 @@ int main(void){
     OLED_Print(6, 0, buffer);
     delay_ms(8000); // Delay for 8 seconds to display the clock information
     OLED_Clear();
+    int Y = 3;
+    int X = 0;
     OLED_Print(0, 0, "CPEG222-F26 OLED Test");
     OLED_Print(1, 0, "10-16-2026");
-    OLED_Print(3, 0, "Carlos Munar");
+    OLED_Print(Y, X, "Carlos Munar");
     while(1){
         // Main loop
+        delay_ms(150);
         OLED_InvertedCheck();
+
+        int oldY = Y;
+        int oldX = X;
+
+        OLED_TextCrawling(&Y, &X);
+        OLED_Print(0, 0, "CPEG222-F26 OLED Test");
+        OLED_Print(1, 0, "10-16-2026");
+
+        if (Y != oldY || X != oldX) {
+            OLED_Print(oldY, oldX, "             "); // Spaces to clear the old copy of my name
+            OLED_Print(Y, X, "Carlos Munar");
+        }
     }   
     return 0;// Program should never reach here due to infinite loop
 }

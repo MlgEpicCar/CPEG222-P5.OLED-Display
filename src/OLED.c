@@ -1,6 +1,7 @@
 // ****************************************************************
-// * Authors: T. LUM and R. MARTIN
+// * Authors: T. LUM and R. MARTIN (and Carlos Munar ;3)
 // * CPEG222 OLED Demo Program, 9/28/2026
+// * Project 5 - OLED Display, 10/16/2026 <-- cooler part
 // * NucleoF446ZE CMSIS STM32F4xx example
 // * Sends text to the OLED display using SPI
 // ****************************************************************
@@ -12,6 +13,20 @@
 /* Switch Definitions */
 #define S1 8
 #define SWITCH_PORT GPIOC
+
+/* Button Definitions */
+#define BUTTON_PORT_F_LCU GPIOF // Port for Left, Center, & Up Buttons
+#define BUTTON_PORT_E_RD GPIOE // Port for Right & Down Buttons
+
+#define UP_PIN     7
+#define DOWN_PIN   5
+#define LEFT_PIN   9
+#define RIGHT_PIN  6
+#define CENTER_PIN 8
+
+// Coordinates are written like (Y, X), where Y+ is down
+volatile int X_coord = 0;
+volatile int Y_coord = 3;
 
 #define SPI1_SCK_PIN     5U  // SPI1 SCK pin is connected to PA5
 #define SPI1_MISO_PIN    6U  // SPI1 MISO pin is connected to PA6
@@ -64,6 +79,8 @@ void OLED_Init(void) {
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;// Enable GPIOA clock
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN;// Enable GPIOG clock
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOEEN;// ur a big boy, you can figure out what this does
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOFEN;
 
     SPI1_PORT->MODER &= ~((0x3U << (SPI1_SCK_PIN * 2U)) |
                           (0x3U << (SPI1_MISO_PIN * 2U)) |
@@ -89,7 +106,15 @@ void OLED_Init(void) {
     OLED_PORT->MODER |= (0x1U << (OLED_DC_PIN * 2U)) |
                         (0x1U << (OLED_RESET_PIN * 2U)); // Set OLED DC and RESET pins as output
 
+    // Configure Switch 1
     SWITCH_PORT->MODER &= ~(3U << (S1 * 2));
+
+    /* Configure Buttons */
+    BUTTON_PORT_F_LCU->MODER &= ~((3U << (LEFT_PIN * 2))|
+                                (3U << (CENTER_PIN * 2))|
+                                   (3U << (UP_PIN * 2)));  
+    BUTTON_PORT_E_RD->MODER &= ~((3U << (RIGHT_PIN * 2))|
+                                 (3U << (DOWN_PIN * 2)));
 
     OLED_Unselect();
     OLED_DC_Data();
@@ -224,5 +249,20 @@ void OLED_InvertedCheck(void) {
         OLED_WriteCmd(0xA7); // Inverted display mode
     } else {
         OLED_WriteCmd(0xA6); // Normal display mode
+    }
+}
+
+void OLED_TextCrawling(int *Y_coord, int *X_coord) {
+    if (!(BUTTON_PORT_E_RD->IDR & (1U << RIGHT_PIN)) && (*X_coord < 49)) // Move Right
+        *X_coord += 6; // This is 6 since each character is 5 columns wide and each space is 1 column wide, so the letters move 1 full letter
+    else if (!(BUTTON_PORT_F_LCU->IDR & (1U << LEFT_PIN)) && (*X_coord > 0)) // Move Left
+        *X_coord -= 6;
+    else if (!(BUTTON_PORT_E_RD->IDR & (1U << DOWN_PIN)) && (*Y_coord < 7)) // Move Down
+        *Y_coord += 1;
+    else if (!(BUTTON_PORT_F_LCU->IDR & (1U << UP_PIN)) && (*Y_coord > 2)) // Move Up
+        *Y_coord -= 1;
+    else if (!(BUTTON_PORT_F_LCU->IDR & (1U << CENTER_PIN))) {  // Resets Text
+        *Y_coord = 3;
+        *X_coord = 0;
     }
 }
